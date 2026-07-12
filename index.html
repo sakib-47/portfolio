@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sakib — Cloud Security & GRC</title>
+<meta name="description" content="Sakib — Cloud GRC Analyst & Cloud Security Engineer in training. AWS security, compliance frameworks, and Go tooling.">
+<meta property="og:title" content="Sakib — Cloud Security & GRC">
+<meta property="og:description" content="Cloud GRC Analyst & Cloud Security Engineer in training. AWS security, compliance frameworks, and Go tooling.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D1526'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%234FB8AE'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1526;
+    --surface:#131E36;
+    --surface-2:#182545;
+    --border:#28395C;
+    --text:#EDF1F7;
+    --text-muted:#8CA0C4;
+    --gold:#C99A3E;
+    --gold-soft:rgba(201,154,62,0.14);
+    --teal:#4FB8AE;
+    --teal-soft:rgba(79,184,174,0.14);
+    --red:#C1554D;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(201,154,62,0.07), transparent 40%),
+      radial-gradient(circle at 85% 25%, rgba(79,184,174,0.06), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+  h1,h2,h3,h4{ font-family:'Space Grotesk', sans-serif; font-weight:600; letter-spacing:-0.01em;}
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 24px; position:relative; z-index:1;}
+  img{ max-width:100%; display:block; }
+
+  /* ---- nav ---- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(13,21,38,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .brand{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px;}
+  .brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal);}
+  .navlinks{ display:flex; gap:28px; font-size:0.92rem; color:var(--text-muted);}
+  .navlinks a{ transition:color .2s ease; }
+  .navlinks a:hover, .navlinks a:focus-visible{ color:var(--gold); }
+  .navlinks{ display:none; }
+  @media(min-width:720px){ .navlinks{ display:flex; } }
+
+  .navcta{ display:none; }
+  @media(min-width:720px){ .navcta{ display:inline-flex; } }
+
+  .hamburger{
+    display:inline-flex; flex-direction:column; justify-content:center; gap:5px;
+    width:36px; height:36px; background:none; border:1px solid var(--border); border-radius:8px;
+    cursor:pointer; padding:0;
+  }
+  @media(min-width:720px){ .hamburger{ display:none; } }
+  .hamburger span{ display:block; height:2px; width:16px; background:var(--text); margin:0 auto; transition:transform .2s ease, opacity .2s ease; }
+  .hamburger[aria-expanded="true"] span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+  .hamburger[aria-expanded="true"] span:nth-child(2){ opacity:0; }
+  .hamburger[aria-expanded="true"] span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+  .mobile-panel{
+    max-height:0; overflow:hidden; background:var(--bg); border-bottom:1px solid transparent;
+    transition:max-height .25s ease, border-color .25s ease;
+  }
+  .mobile-panel.open{ max-height:280px; border-color:var(--border); }
+  .mobile-panel .wrap{ display:flex; flex-direction:column; padding:8px 24px 18px; gap:2px; }
+  .mobile-panel a{
+    padding:12px 4px; font-size:0.95rem; color:var(--text-muted); border-bottom:1px solid var(--border);
+  }
+  .mobile-panel a:last-child{ border-bottom:none; }
+  .mobile-panel a:hover{ color:var(--gold); }
+  @media(min-width:720px){ .mobile-panel{ display:none; } }
+
+  /* ---- hero ---- */
+  .hero{ padding:64px 0 56px; }
+  .hero-grid{ display:grid; grid-template-columns:1fr; gap:40px; align-items:center;}
+  @media(min-width:900px){ .hero-grid{ grid-template-columns:1.1fr 0.9fr; gap:48px; } }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:0.12em;
+    color:var(--gold); text-transform:uppercase;
+    border:1px solid var(--gold-soft); background:var(--gold-soft);
+    padding:5px 12px; border-radius:20px; margin-bottom:20px;
+  }
+  .hero h1{ font-size:clamp(2.1rem, 5vw, 3.1rem); line-height:1.12; margin-bottom:18px;}
+  .hero h1 .accent{ color:var(--teal); }
+  .hero p.lede{ color:var(--text-muted); font-size:1.05rem; max-width:52ch; margin-bottom:28px;}
+  .btn-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:12px 22px; border-radius:8px; font-size:0.92rem; font-weight:600;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    border:1px solid transparent;
+  }
+  .btn-primary{ background:var(--gold); color:#191204; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 20px rgba(201,154,62,0.25); }
+  .btn-ghost{ border-color:var(--border); color:var(--text); }
+  .btn-ghost:hover{ border-color:var(--teal); color:var(--teal); transform:translateY(-2px); }
+
+  /* ---- terminal signature ---- */
+  .terminal{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .terminal-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:12px 16px; border-bottom:1px solid var(--border);
+    background:var(--surface-2);
+  }
+  .terminal-bar .tdot{ width:10px; height:10px; border-radius:50%; }
+  .terminal-bar .tdot:nth-child(1){ background:#C1554D; }
+  .terminal-bar .tdot:nth-child(2){ background:#C99A3E; }
+  .terminal-bar .tdot:nth-child(3){ background:#4FB8AE; }
+  .terminal-bar span.title{
+    margin-left:8px; font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--text-muted);
+  }
+  .terminal-body{ padding:20px 18px; font-family:'IBM Plex Mono',monospace; font-size:0.82rem; min-height:230px;}
+  .tline{ display:flex; justify-content:space-between; gap:10px; padding:6px 0; opacity:0; transform:translateY(4px); animation:tin .4s ease forwards; border-bottom:1px dashed rgba(255,255,255,0.04);}
+  .tline:last-child{ border-bottom:none; }
+  .tline .k{ color:var(--text-muted); }
+  .tline .status{ font-weight:600; letter-spacing:0.03em; }
+  .status.pass{ color:var(--teal); }
+  .status.run{ color:var(--gold); }
+  @keyframes tin{ to{ opacity:1; transform:translateY(0); } }
+  .cursor{ display:inline-block; width:7px; height:14px; background:var(--gold); margin-left:2px; animation:blink 1s step-end infinite; vertical-align:middle;}
+  @keyframes blink{ 50%{ opacity:0; } }
+  @media(prefers-reduced-motion:reduce){
+    .tline{ animation:none; opacity:1; transform:none; }
+    .cursor{ animation:none; }
+  }
+
+  section{ padding:64px 0; border-top:1px solid var(--border); }
+  .section-head{ margin-bottom:36px; }
+  .section-head .eyebrow{ margin-bottom:14px; }
+  .section-head h2{ font-size:clamp(1.5rem,3vw,2.1rem); }
+  .section-head p{ color:var(--text-muted); max-width:60ch; margin-top:10px; }
+
+  /* ---- about ---- */
+  .about-grid{ display:grid; grid-template-columns:1fr; gap:36px; }
+  @media(min-width:800px){ .about-grid{ grid-template-columns:220px 1fr; align-items:start; } }
+  .badge{
+    width:180px; height:180px; border-radius:50%;
+    border:1.5px dashed var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; margin:0 auto;
+  }
+  .badge::before{
+    content:""; position:absolute; inset:14px; border-radius:50%; border:1px solid var(--border);
+  }
+  .badge span{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:2.4rem; color:var(--gold);
+  }
+  .badge-caption{ text-align:center; margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase;}
+  .about-text p{ color:var(--text-muted); margin-bottom:16px; max-width:65ch; }
+  .about-text strong{ color:var(--text); }
+  .about-facts{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:24px; max-width:420px; }
+  .fact{ border:1px solid var(--border); border-radius:8px; padding:14px 16px; background:var(--surface); }
+  .fact .num{ font-family:'IBM Plex Mono',monospace; color:var(--teal); font-size:0.72rem; letter-spacing:0.06em;}
+  .fact .val{ font-family:'Space Grotesk',sans-serif; font-weight:600; margin-top:4px; font-size:0.95rem;}
+
+  /* ---- skills ---- */
+  .skills-grid{ display:grid; grid-template-columns:1fr; gap:20px; }
+  @media(min-width:800px){ .skills-grid{ grid-template-columns:repeat(3,1fr); } }
+  .skill-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .skill-card:hover{ border-color:var(--teal); transform:translateY(-3px); }
+  .skill-card .ctrl-id{
+    font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--gold);
+    letter-spacing:0.08em; margin-bottom:10px; display:block;
+  }
+  .skill-card h3{ font-size:1.1rem; margin-bottom:14px; }
+  .skill-card ul{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .skill-card li{
+    font-size:0.88rem; color:var(--text-muted);
+    padding-left:16px; position:relative;
+  }
+  .skill-card li::before{
+    content:"›"; position:absolute; left:0; color:var(--teal); font-weight:700;
+  }
+
+  /* ---- projects ---- */
+  .proj-feature{
+    display:grid; grid-template-columns:1fr; gap:20px; margin-bottom:22px;
+    background:linear-gradient(160deg, var(--surface), var(--surface-2));
+    border:1px solid var(--border); border-radius:14px; padding:28px;
+  }
+  @media(min-width:800px){ .proj-feature{ grid-template-columns:1.3fr 0.9fr; padding:34px; } }
+  .proj-tag{
+    display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.06em;
+    color:var(--bg); background:var(--teal); padding:4px 10px; border-radius:4px; margin-bottom:14px; text-transform:uppercase;
+  }
+  .proj-tag.wip{ background:var(--gold); }
+  .proj-feature h3{ font-size:1.35rem; margin-bottom:12px; }
+  .proj-feature p{ color:var(--text-muted); margin-bottom:16px; font-size:0.94rem; }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .chip{
+    font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--text-muted);
+    border:1px solid var(--border); padding:4px 10px; border-radius:20px;
+  }
+  .proj-side{ border-left:1px solid var(--border); padding-left:24px; display:flex; flex-direction:column; gap:12px; justify-content:center; }
+  @media(max-width:799px){ .proj-side{ border-left:none; border-top:1px solid var(--border); padding-left:0; padding-top:18px; } }
+  .proj-side .label{ font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;}
+  .proj-side .line{ font-size:0.88rem; }
+
+  .mini-grid{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:8px; }
+  @media(min-width:640px){ .mini-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(min-width:960px){ .mini-grid{ grid-template-columns:repeat(3,1fr); } }
+  .mini-card{
+    border:1px solid var(--border); border-radius:10px; padding:18px;
+    background:var(--surface); transition:transform .2s ease, border-color .2s ease;
+  }
+  .mini-card:hover{ transform:translateY(-3px); border-color:var(--gold); }
+  .mini-card .wk{ font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--gold); letter-spacing:0.06em; margin-bottom:8px; display:block;}
+  .mini-card h4{ font-size:0.98rem; margin-bottom:6px; }
+  .mini-card p{ font-size:0.84rem; color:var(--text-muted); margin-bottom:10px; }
+  .mini-card .mini-repo{
+    font-family:'IBM Plex Mono',monospace; font-size:0.74rem; color:var(--teal);
+    display:inline-block; border-top:1px solid var(--border); padding-top:10px; margin-top:2px; width:100%;
+    transition:color .2s ease;
+  }
+  .mini-card .mini-repo:hover{ color:var(--gold); }
+
+  /* ---- resume ---- */
+  .resume-card{
+    display:grid; grid-template-columns:1fr; gap:28px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:32px;
+  }
+  @media(min-width:800px){ .resume-card{ grid-template-columns:1fr 1px 1fr; padding:38px; } }
+  .resume-divider{ background:var(--border); width:1px; }
+  @media(max-width:799px){ .resume-divider{ display:none; } }
+  .resume-col h3{ font-size:1rem; margin-bottom:16px; }
+  .resume-list{ list-style:none; display:flex; flex-direction:column; gap:14px; }
+  .resume-list li{ display:flex; justify-content:space-between; gap:12px; font-size:0.88rem; border-bottom:1px dashed var(--border); padding-bottom:12px;}
+  .resume-list li:last-child{ border-bottom:none; padding-bottom:0; }
+  .resume-list .rl-label{ color:var(--text-muted); }
+  .resume-list .rl-val{ font-family:'IBM Plex Mono',monospace; color:var(--text); text-align:right; }
+  .resume-download{ display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:16px; height:100%; }
+  .resume-download p{ color:var(--text-muted); font-size:0.9rem; }
+  .resume-updated{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--text-muted); letter-spacing:0.04em; }
+
+  /* ---- contact ---- */
+  .contact-box{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:36px; text-align:center;
+  }
+  .contact-box h2{ font-size:1.6rem; margin-bottom:10px; }
+  .contact-box p{ color:var(--text-muted); margin-bottom:26px; max-width:50ch; margin-left:auto; margin-right:auto;}
+  .contact-links{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+  footer{ padding:28px 0; text-align:center; color:var(--text-muted); font-size:0.82rem; font-family:'IBM Plex Mono',monospace; border-top:1px solid var(--border); }
+
+  ::selection{ background:var(--gold-soft); color:var(--gold); }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--teal); outline-offset:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="brand"><span class="dot"></span>Sakib<span class="mono" style="color:var(--text-muted); font-weight:400; font-size:0.85rem;">.sec</span></div>
+    <div class="navlinks">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#resume">Resume</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a href="#contact" class="btn btn-primary navcta" style="padding:9px 18px; font-size:0.85rem;">Contact</a>
+    <button class="hamburger" id="hamburgerBtn" aria-expanded="false" aria-controls="mobilePanel" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-panel" id="mobilePanel">
+    <div class="wrap">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#resume">Resume</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Cloud Security · GRC</div>
+      <h1>Securing cloud infrastructure,<br> one <span class="accent">control</span> at a time.</h1>
+      <p class="lede">Final-year engineering student building toward Cloud GRC Analyst and Cloud Security Engineer roles — mapping compliance frameworks to real AWS controls and shipping the Go tooling that checks them automatically.</p>
+      <div class="btn-row">
+        <a href="#projects" class="btn btn-primary">View Projects</a>
+        <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+        <span class="title">compliance_scan.go — output</span>
+      </div>
+      <div class="terminal-body" id="termBody"></div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="wrap about-grid">
+    <div>
+      <div class="badge"><span>SK</span></div>
+      <div class="badge-caption">Verified · In Training</div>
+    </div>
+    <div class="about-text">
+      <div class="section-head" style="margin-bottom:16px;">
+        <div class="eyebrow">About</div>
+        <h2>From engineering fundamentals to cloud control frameworks</h2>
+      </div>
+      <p>I'm a <strong>final-year engineering student</strong>, building a focused path into <strong>Cloud Security</strong> — starting as a <strong>Cloud GRC Analyst</strong> and growing toward <strong>Cloud Security Engineer</strong>. My work sits at the intersection of two things I care about: understanding <em>why</em> a control exists (ISO 27001, NIST CSF, SOC 2, CIS Benchmarks) and being able to <em>build the tooling</em> that checks it automatically, in Go.</p>
+      <p>Rather than treating security knowledge and software engineering as separate tracks, I'm building both together — every compliance concept I learn gets turned into working code within the same week, tested against real AWS environments on the Free Tier.</p>
+      <div class="about-facts">
+        <div class="fact"><div class="num">// FOCUS</div><div class="val">Cloud GRC → Cloud Sec Eng</div></div>
+        <div class="fact"><div class="num">// STACK</div><div class="val">AWS · Go · Terraform</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Skills</div>
+      <h2>What I bring to a cloud security team</h2>
+      <p>Grouped the way a control framework would group them — the security domain, the compliance domain, and the engineering that ties both together.</p>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <span class="ctrl-id">CTRL-CLOUD</span>
+        <h3>Cloud Security</h3>
+        <ul>
+          <li>AWS IAM policy design & review</li>
+          <li>VPC architecture & network segmentation</li>
+          <li>S3 bucket security & encryption</li>
+          <li>CloudTrail, CloudWatch, GuardDuty</li>
+          <li>Security group & IaC hardening (Terraform)</li>
+        </ul>
+      </div>
+      <div class="skill-card">
+        <span class="ctrl-id">CTRL-GRC</span>
+        <h3>GRC & Compliance</h3>
+        <ul>
+          <li>ISO 27001 control mapping</li>
+          <li>NIST Cybersecurity Framework</li>
+          <li>SOC 2 readiness concepts</li>
+          <li>CIS AWS Foundations Benchmark</li>
+          <li>Risk assessment fundamentals</li>
+        </ul>
+      </div>
+      <div class="skill-card">
+        <span class="ctrl-id">CTRL-ENG</span>
+        <h3>Engineering & Tooling</h3>
+        <ul>
+          <li>Go (Golang) — concurrency, CLI, REST APIs</li>
+          <li>AWS SDK for Go v2</li>
+          <li>Cobra-based CLI tooling</li>
+          <li>Docker & Kubernetes security basics</li>
+          <li>Automated compliance reporting (JSON/HTML)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Projects</div>
+      <h2>Tools that turn compliance frameworks into running code</h2>
+      <p>Two capstone builds, backed by a run of smaller weekly tools that prove out each concept before it's assembled into the bigger picture.</p>
+    </div>
+
+    <div class="proj-feature">
+      <div>
+        <span class="proj-tag">Flagship</span>
+        <h3>CloudGuard — AWS Compliance Scanner</h3>
+        <p>A Go CLI that audits live AWS accounts against the CIS AWS Foundations Benchmark: flags IAM wildcard permissions and unused keys, public/unencrypted S3 buckets, and open security groups — then outputs a pass/fail report mapped to control IDs.</p>
+        <div class="chips">
+          <span class="chip">Go</span><span class="chip">AWS SDK v2</span><span class="chip">Cobra CLI</span><span class="chip">CIS Benchmark</span>
+        </div>
+      </div>
+      <div class="proj-side">
+        <div><span class="label">Maps to</span><div class="line">CIS AWS Foundations Benchmark</div></div>
+        <div><span class="label">Output</span><div class="line">JSON / HTML compliance report</div></div>
+        <div><span class="label">Repo</span><div class="line mono" style="color:var(--teal);">github.com/[your-username]/cloudguard</div></div>
+      </div>
+    </div>
+
+    <div class="proj-feature">
+      <div>
+        <span class="proj-tag wip">Detection</span>
+        <h3>SentinelGo — Security Monitoring & Alerting</h3>
+        <p>A scheduled Go service that pulls CloudTrail activity, flags anomalies — root usage, IAM changes, unusual API calls — and pushes real-time alerts to Slack, with findings logged for historical review.</p>
+        <div class="chips">
+          <span class="chip">Go</span><span class="chip">AWS Lambda</span><span class="chip">CloudTrail</span><span class="chip">Slack Webhook</span>
+        </div>
+      </div>
+      <div class="proj-side">
+        <div><span class="label">Detects</span><div class="line">MITRE ATT&CK-style patterns</div></div>
+        <div><span class="label">Alerts via</span><div class="line">Slack / Discord webhook</div></div>
+        <div><span class="label">Repo</span><div class="line mono" style="color:var(--teal);">github.com/[your-username]/sentinelgo</div></div>
+      </div>
+    </div>
+
+    <div class="mini-grid">
+      <div class="mini-card">
+        <span class="wk">WEEK 01</span>
+        <h4>Network Sweeper</h4>
+        <p>Go CLI that pings a list of hosts and reports up/down status.</p>
+        <a href="https://github.com/your-username/network-sweeper" class="mini-repo">github.com/[your-username]/network-sweeper</a>
+      </div>
+      <div class="mini-card">
+        <span class="wk">WEEK 02</span>
+        <h4>Public Bucket Auditor</h4>
+        <p>Lists S3 buckets via AWS SDK and flags public read access.</p>
+        <a href="https://github.com/your-username/bucket-auditor" class="mini-repo">github.com/[your-username]/bucket-auditor</a>
+      </div>
+      <div class="mini-card">
+        <span class="wk">WEEK 04</span>
+        <h4>Terraform Misconfig Linter</h4>
+        <p>Flags risky lines — open security groups, public S3 — in .tf files.</p>
+        <a href="https://github.com/your-username/tf-lint-sec" class="mini-repo">github.com/[your-username]/tf-lint-sec</a>
+      </div>
+      <div class="mini-card">
+        <span class="wk">WEEK 06</span>
+        <h4>Image Vuln API</h4>
+        <p>Go REST API wrapping Trivy for container image scan results.</p>
+        <a href="https://github.com/your-username/image-vuln-api" class="mini-repo">github.com/[your-username]/image-vuln-api</a>
+      </div>
+      <div class="mini-card">
+        <span class="wk">WEEK 07</span>
+        <h4>IAM CIS Checker</h4>
+        <p>Checks IAM policies against a CIS benchmark rule set.</p>
+        <a href="https://github.com/your-username/iam-cis-checker" class="mini-repo">github.com/[your-username]/iam-cis-checker</a>
+      </div>
+      <div class="mini-card">
+        <span class="wk">WEEK 08</span>
+        <h4>Log Pattern Worker Pool</h4>
+        <p>Concurrent Go tool flagging MITRE ATT&CK-style log patterns.</p>
+        <a href="https://github.com/your-username/log-pattern-pool" class="mini-repo">github.com/[your-username]/log-pattern-pool</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="resume">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Resume</div>
+      <h2>The one-page version of all of this</h2>
+      <p>Education, focus area, and current standing at a glance — full detail lives in the PDF.</p>
+    </div>
+
+    <div class="resume-card">
+      <div class="resume-col">
+        <h3>Snapshot</h3>
+        <ul class="resume-list">
+          <li><span class="rl-label">Education</span><span class="rl-val">Final-Year Engineering<br>(VTU)</span></li>
+          <li><span class="rl-label">Location</span><span class="rl-val">Mangalore, India</span></li>
+          <li><span class="rl-label">Career Vector</span><span class="rl-val">Cloud GRC Analyst<br>& Cloud Security Engineer</span></li>
+          <li><span class="rl-label">Core Stack</span><span class="rl-val">AWS · Go · Terraform</span></li>
+          <li><span class="rl-label">Projects Shipped</span><span class="rl-val">2 Capstones + 6 Tools</span></li>
+          <li><span class="rl-label">In Progress</span><span class="rl-val">ISO 27001 Foundation</span></li>
+        </ul>
+      </div>
+
+      <div class="resume-divider"></div>
+
+      <div class="resume-col resume-download">
+        <h3>Download</h3>
+        <p>A concise, ATS-friendly PDF covering education, projects, and skills — updated as each roadmap milestone ships.</p>
+        <a href="resume.pdf" download class="btn btn-primary">Download Resume (PDF)</a>
+        <span class="resume-updated">// last updated: [update this date]</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-box">
+      <h2>Let's talk cloud security.</h2>
+      <p>Open to Cloud GRC Analyst and Cloud Security Engineer opportunities. Reach out, or take a look at the projects above.</p>
+      <div class="contact-links">
+        <a href="mailto:your.email@example.com" class="btn btn-primary">Email Me</a>
+        <a href="https://github.com/your-username" class="btn btn-ghost">GitHub</a>
+        <a href="https://linkedin.com/in/your-username" class="btn btn-ghost">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">// built by Sakib — updated as each roadmap week ships</div>
+</footer>
+
+<script>
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mobilePanel = document.getElementById('mobilePanel');
+
+  hamburgerBtn.addEventListener('click', () => {
+    const isOpen = mobilePanel.classList.toggle('open');
+    hamburgerBtn.setAttribute('aria-expanded', isOpen);
+  });
+
+  mobilePanel.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobilePanel.classList.remove('open');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  const lines = [
+    { k: "AWS-IAM-001 :: least-privilege review", s: "PASS", cls: "pass" },
+    { k: "AWS-S3-002 :: public access block", s: "PASS", cls: "pass" },
+    { k: "AWS-CLOUDTRAIL-003 :: logging enabled", s: "PASS", cls: "pass" },
+    { k: "GRC-ISO27001 :: control mapping", s: "PASS", cls: "pass" },
+    { k: "GO-CONCURRENCY :: worker pool patterns", s: "PASS", cls: "pass" },
+    { k: "CLOUDGUARD-CLI :: build", s: "RUNNING", cls: "run" },
+  ];
+
+  const body = document.getElementById('termBody');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function renderLine(item, delay){
+    const el = document.createElement('div');
+    el.className = 'tline';
+    if(!reduceMotion) el.style.animationDelay = delay + 's';
+    el.innerHTML = `<span class="k">${item.k}</span><span class="status ${item.cls}">${item.s}</span>`;
+    body.appendChild(el);
+  }
+
+  lines.forEach((item, i) => renderLine(item, i * 0.35));
+
+  const cursorLine = document.createElement('div');
+  cursorLine.className = 'tline';
+  cursorLine.style.animationDelay = (lines.length * 0.35) + 's';
+  cursorLine.innerHTML = `<span class="k">$ <span class="cursor"></span></span>`;
+  body.appendChild(cursorLine);
+</script>
+
+</body>
+</html>
