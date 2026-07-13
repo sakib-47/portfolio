@@ -718,7 +718,35 @@
         { t: "Point-in-time recovery enabled, 35-day window", risky: false },
         { t: "Encryption at rest enabled (KMS)", risky: false }
       ],
-      explain: "Without point-in-time recovery, there's no way to roll back accidental or malicious writes." }
+      explain: "Without point-in-time recovery, there's no way to roll back accidental or malicious writes." },
+    { q: "Which load balancer setup makes post-incident investigation impossible?",
+      opts: [
+        { t: "ALB access logging enabled", risky: false },
+        { t: "ALB access logging disabled", risky: true },
+        { t: "ALB with WAF and access logging enabled", risky: false }
+      ],
+      explain: "Without access logs, you can't reconstruct who hit your endpoints or when." },
+    { q: "Which setup means configuration drift goes completely unnoticed?",
+      opts: [
+        { t: "AWS Config enabled with compliance rules", risky: false },
+        { t: "AWS Config disabled", risky: true },
+        { t: "AWS Config enabled, recording all resources", risky: false }
+      ],
+      explain: "Without AWS Config, there's no continuous record of resource configuration changes to audit against." },
+    { q: "Which password policy is basically an open invitation?",
+      opts: [
+        { t: "14-char minimum, rotation enforced", risky: false },
+        { t: "Default policy, never updated", risky: true },
+        { t: "14-char minimum, MFA required", risky: false }
+      ],
+      explain: "A weak default password policy makes credential-stuffing and brute-force attacks far easier." },
+    { q: "Which cross-account trust policy lets any AWS account assume your role?",
+      opts: [
+        { t: "Trust scoped to a specific account ID + external ID", risky: false },
+        { t: 'Trust policy: "Principal": "*"', risky: true },
+        { t: "Trust scoped to a specific account ID only", risky: false }
+      ],
+      explain: "A wildcard principal in a trust policy means literally any AWS account could assume that role." }
   ];
 
   const QUIZ_LENGTH = 5;
