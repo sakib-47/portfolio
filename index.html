@@ -607,90 +607,118 @@
 
   /* ---- Spot the Misconfiguration quiz ---- */
   const questionPool = [
-    { q: "Which S3 bucket configuration is the risky one?",
+    { q: "One of these S3 setups is a data leak waiting to happen. Which one?",
       opts: [
         { t: "ACL: private | Block Public Access: ON", risky: false },
         { t: "ACL: public-read | Encryption: none", risky: true },
         { t: "ACL: private | SSE-KMS: enabled", risky: false }
       ],
       explain: "Public-read ACL with no encryption exposes objects to anyone with the URL." },
-    { q: "Which IAM policy statement is the risky one?",
+    { q: "This IAM statement breaks least privilege. Spot it.",
       opts: [
         { t: '"Action": "s3:GetObject", "Resource": "arn:aws:s3:::app-bucket/*"', risky: false },
         { t: '"Action": "*", "Resource": "*"', risky: true },
         { t: '"Action": "ec2:DescribeInstances", "Resource": "*"', risky: false }
       ],
       explain: "Wildcard action and resource grants unrestricted access to every service." },
-    { q: "Which security group rule is the risky one?",
+    { q: "One of these security group rules should never ship to production. Which?",
       opts: [
         { t: "Inbound 443/tcp from 0.0.0.0/0", risky: false },
         { t: "Inbound 22/tcp from 10.0.0.0/16", risky: false },
         { t: "Inbound 22/tcp from 0.0.0.0/0", risky: true }
       ],
       explain: "SSH open to the entire internet is a classic brute-force target." },
-    { q: "Which CloudTrail setup is the risky one?",
+    { q: "Which CloudTrail setup would leave you blind during an incident?",
       opts: [
         { t: "Multi-region trail, log file validation ON", risky: false },
         { t: "Single-region trail, log file validation OFF", risky: true },
         { t: "Multi-region trail, logs to encrypted S3", risky: false }
       ],
       explain: "Single-region with no validation misses activity elsewhere and can't detect tampering." },
-    { q: "Which Terraform resource setting is the risky one?",
+    { q: "Which Terraform config would fail a CIS compliance check?",
       opts: [
         { t: "encrypted = true, versioning = true", risky: false },
         { t: "public_access_block = all true", risky: false },
         { t: 'acl = "public-read-write"', risky: true }
       ],
       explain: "Public-read-write lets anyone read AND overwrite objects in the bucket." },
-    { q: "Which RDS configuration is the risky one?",
+    { q: "Which RDS setup hands your database to the internet?",
       opts: [
         { t: "publicly_accessible = false", risky: false },
         { t: "publicly_accessible = true, no SG restriction", risky: true },
         { t: "publicly_accessible = false, encrypted = true", risky: false }
       ],
       explain: "A publicly accessible database with no security group restriction is exposed directly to the internet." },
-    { q: "Which EBS volume setup is the risky one?",
+    { q: "Which EBS volume would expose data if the disk were ever compromised?",
       opts: [
         { t: "encrypted = true", risky: false },
         { t: "encrypted = false, contains sensitive data", risky: true },
         { t: "encrypted = true, snapshot encrypted = true", risky: false }
       ],
       explain: "Unencrypted volumes leave data exposed if the disk or snapshot is ever accessed outside your account." },
-    { q: "Which Lambda execution role setup is the risky one?",
+    { q: "Which Lambda role setup violates least privilege?",
       opts: [
         { t: "Scoped to a specific DynamoDB table", risky: false },
         { t: "AdministratorAccess attached", risky: true },
         { t: "Scoped to a specific S3 prefix", risky: false }
       ],
       explain: "Attaching AdministratorAccess violates least privilege — one exploited function could control the whole account." },
-    { q: "Which VPC logging setup is the risky one?",
+    { q: "Which VPC logging setup leaves no trail after an incident?",
       opts: [
         { t: "Enabled, sent to CloudWatch", risky: false },
         { t: "Disabled", risky: true },
         { t: "Enabled, sent to S3 with retention policy", risky: false }
       ],
       explain: "Without flow logs, there's no record of network traffic to investigate after an incident." },
-    { q: "Which secrets management setup is the risky one?",
+    { q: "Which secrets setup is an attacker's dream?",
       opts: [
         { t: "Automatic rotation enabled (30 days)", risky: false },
         { t: "Rotation disabled, secret unchanged for 2 years", risky: true },
         { t: "Automatic rotation enabled (90 days)", risky: false }
       ],
       explain: "Long-lived, never-rotated credentials are a prime target if ever leaked." },
-    { q: "Which S3 setup leaves you most exposed to accidental or malicious deletion?",
+    { q: "Which S3 setup can't recover from an accidental delete?",
       opts: [
         { t: "Versioning enabled, MFA delete enabled", risky: false },
         { t: "Versioning disabled", risky: true },
         { t: "Versioning enabled, MFA delete disabled", risky: false }
       ],
       explain: "Without versioning, a deleted or overwritten object is gone for good." },
-    { q: "Which container registry setup is the risky one?",
+    { q: "Which container registry setup ships vulnerabilities straight to prod?",
       opts: [
         { t: "Image scanning on push enabled", risky: false },
         { t: "Image scanning disabled", risky: true },
         { t: "Scanning enabled + lifecycle policy for old images", risky: false }
       ],
-      explain: "Unscanned images can ship known vulnerabilities straight into production." }
+      explain: "Unscanned images can ship known vulnerabilities straight into production." },
+    { q: "Which KMS key policy hands out the keys to everyone?",
+      opts: [
+        { t: "Policy scoped to specific IAM roles", risky: false },
+        { t: 'Policy: "Principal": "*", "Action": "kms:*"', risky: true },
+        { t: "Policy scoped to a specific service principal", risky: false }
+      ],
+      explain: "A wildcard principal with kms:* lets any AWS identity use and manage the key." },
+    { q: "Which setup leaves a public-facing app without a first line of defense?",
+      opts: [
+        { t: "WAF enabled with managed rule sets", risky: false },
+        { t: "WAF not attached to the public-facing ALB", risky: true },
+        { t: "WAF enabled with custom rate-limiting rules", risky: false }
+      ],
+      explain: "No WAF on a public-facing load balancer means common web exploits go unfiltered." },
+    { q: "Which root account setup is a single point of catastrophic failure?",
+      opts: [
+        { t: "MFA enabled, access keys deleted", risky: false },
+        { t: "MFA disabled, active access keys", risky: true },
+        { t: "MFA enabled, no access keys", risky: false }
+      ],
+      explain: "A root account without MFA and with active keys is the highest-value target in the account." },
+    { q: "Which DynamoDB setup risks permanent data loss after a bad write?",
+      opts: [
+        { t: "Point-in-time recovery disabled", risky: true },
+        { t: "Point-in-time recovery enabled, 35-day window", risky: false },
+        { t: "Encryption at rest enabled (KMS)", risky: false }
+      ],
+      explain: "Without point-in-time recovery, there's no way to roll back accidental or malicious writes." }
   ];
 
   const QUIZ_LENGTH = 5;
