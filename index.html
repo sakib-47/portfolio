@@ -251,6 +251,43 @@
   }
   .mini-card .mini-repo:hover{ color:var(--gold); }
 
+  /* ---- quiz ---- */
+  .quiz-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:32px; max-width:640px;
+  }
+  .quiz-progress{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--text-muted);
+    letter-spacing:0.06em; margin-bottom:20px; text-transform:uppercase;
+  }
+  .quiz-progress .score{ color:var(--teal); }
+  .quiz-snippet{
+    background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--gold);
+    border-radius:8px; padding:16px 18px; font-family:'IBM Plex Mono',monospace; font-size:0.82rem;
+    color:var(--text); white-space:pre-wrap; line-height:1.7; margin-bottom:20px; overflow-x:auto;
+  }
+  .quiz-q{ font-size:0.98rem; margin-bottom:16px; color:var(--text); }
+  .quiz-options{ display:flex; flex-direction:column; gap:10px; }
+  .quiz-opt{
+    text-align:left; padding:13px 16px; border:1px solid var(--border); border-radius:8px;
+    background:transparent; color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:0.9rem;
+    cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .quiz-opt:hover:not(:disabled){ border-color:var(--teal); }
+  .quiz-opt:disabled{ cursor:default; }
+  .quiz-opt.correct{ border-color:var(--teal); background:var(--teal-soft); color:var(--teal); }
+  .quiz-opt.incorrect{ border-color:var(--red); background:rgba(193,85,77,0.1); color:var(--red); }
+  .quiz-feedback{
+    margin-top:16px; font-size:0.85rem; color:var(--text-muted);
+    border-top:1px dashed var(--border); padding-top:14px; display:none;
+  }
+  .quiz-feedback.show{ display:block; }
+  .quiz-next{ margin-top:18px; }
+  .quiz-result{ text-align:center; padding:20px 0; }
+  .quiz-result .grade{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.5rem; color:var(--gold); margin:10px 0; }
+  .quiz-result p{ color:var(--text-muted); font-size:0.9rem; max-width:44ch; margin:0 auto 20px; }
+
   /* ---- resume ---- */
   .resume-card{
     display:grid; grid-template-columns:1fr; gap:28px;
@@ -293,6 +330,7 @@
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
       <a href="#projects">Projects</a>
+      <a href="#quiz">Quiz</a>
       <a href="#resume">Resume</a>
       <a href="#contact">Contact</a>
     </div>
@@ -306,6 +344,7 @@
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
       <a href="#projects">Projects</a>
+      <a href="#quiz">Quiz</a>
       <a href="#resume">Resume</a>
       <a href="#contact">Contact</a>
     </div>
@@ -481,6 +520,24 @@
   </div>
 </section>
 
+<section id="quiz">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Playground</div>
+      <h2>Spot the Misconfiguration</h2>
+      <p>Five real-world cloud security scenarios. Pick the risky one in each set — the same instinct a GRC review runs on.</p>
+    </div>
+
+    <div class="quiz-card" id="quizCard">
+      <div class="quiz-progress">
+        <span id="quizProgress">Question 1/5</span>
+        <span class="score">Score: <span id="quizScore">0</span>/5</span>
+      </div>
+      <div id="quizBody"></div>
+    </div>
+  </div>
+</section>
+
 <section id="resume">
   <div class="wrap">
     <div class="section-head">
@@ -518,7 +575,7 @@
   <div class="wrap">
     <div class="contact-box">
       <h2>Let's talk cloud security.</h2>
-      <p>Open to Cloud GRC Analyst and Cloud Security Engineer opportunities. Reach out or take a look at the projects above.</p>
+      <p>Open to Cloud GRC Analyst and Cloud Security Engineer opportunities. Reach out, or take a look at the projects above.</p>
       <div class="contact-links">
         <a href="mailto:sakibbeig47@gmail.com" class="btn btn-primary">Email Me</a>
         <a href="https://github.com/sakib-47" class="btn btn-ghost">GitHub</a>
@@ -547,6 +604,213 @@
       hamburgerBtn.setAttribute('aria-expanded', 'false');
     });
   });
+
+  /* ---- Spot the Misconfiguration quiz ---- */
+  const questionPool = [
+    { q: "Which S3 bucket configuration is the risky one?",
+      opts: [
+        { t: "ACL: private | Block Public Access: ON", risky: false },
+        { t: "ACL: public-read | Encryption: none", risky: true },
+        { t: "ACL: private | SSE-KMS: enabled", risky: false }
+      ],
+      explain: "Public-read ACL with no encryption exposes objects to anyone with the URL." },
+    { q: "Which IAM policy statement is the risky one?",
+      opts: [
+        { t: '"Action": "s3:GetObject", "Resource": "arn:aws:s3:::app-bucket/*"', risky: false },
+        { t: '"Action": "*", "Resource": "*"', risky: true },
+        { t: '"Action": "ec2:DescribeInstances", "Resource": "*"', risky: false }
+      ],
+      explain: "Wildcard action and resource grants unrestricted access to every service." },
+    { q: "Which security group rule is the risky one?",
+      opts: [
+        { t: "Inbound 443/tcp from 0.0.0.0/0", risky: false },
+        { t: "Inbound 22/tcp from 10.0.0.0/16", risky: false },
+        { t: "Inbound 22/tcp from 0.0.0.0/0", risky: true }
+      ],
+      explain: "SSH open to the entire internet is a classic brute-force target." },
+    { q: "Which CloudTrail setup is the risky one?",
+      opts: [
+        { t: "Multi-region trail, log file validation ON", risky: false },
+        { t: "Single-region trail, log file validation OFF", risky: true },
+        { t: "Multi-region trail, logs to encrypted S3", risky: false }
+      ],
+      explain: "Single-region with no validation misses activity elsewhere and can't detect tampering." },
+    { q: "Which Terraform resource setting is the risky one?",
+      opts: [
+        { t: "encrypted = true, versioning = true", risky: false },
+        { t: "public_access_block = all true", risky: false },
+        { t: 'acl = "public-read-write"', risky: true }
+      ],
+      explain: "Public-read-write lets anyone read AND overwrite objects in the bucket." },
+    { q: "Which RDS configuration is the risky one?",
+      opts: [
+        { t: "publicly_accessible = false", risky: false },
+        { t: "publicly_accessible = true, no SG restriction", risky: true },
+        { t: "publicly_accessible = false, encrypted = true", risky: false }
+      ],
+      explain: "A publicly accessible database with no security group restriction is exposed directly to the internet." },
+    { q: "Which EBS volume setup is the risky one?",
+      opts: [
+        { t: "encrypted = true", risky: false },
+        { t: "encrypted = false, contains sensitive data", risky: true },
+        { t: "encrypted = true, snapshot encrypted = true", risky: false }
+      ],
+      explain: "Unencrypted volumes leave data exposed if the disk or snapshot is ever accessed outside your account." },
+    { q: "Which Lambda execution role setup is the risky one?",
+      opts: [
+        { t: "Scoped to a specific DynamoDB table", risky: false },
+        { t: "AdministratorAccess attached", risky: true },
+        { t: "Scoped to a specific S3 prefix", risky: false }
+      ],
+      explain: "Attaching AdministratorAccess violates least privilege — one exploited function could control the whole account." },
+    { q: "Which VPC logging setup is the risky one?",
+      opts: [
+        { t: "Enabled, sent to CloudWatch", risky: false },
+        { t: "Disabled", risky: true },
+        { t: "Enabled, sent to S3 with retention policy", risky: false }
+      ],
+      explain: "Without flow logs, there's no record of network traffic to investigate after an incident." },
+    { q: "Which secrets management setup is the risky one?",
+      opts: [
+        { t: "Automatic rotation enabled (30 days)", risky: false },
+        { t: "Rotation disabled, secret unchanged for 2 years", risky: true },
+        { t: "Automatic rotation enabled (90 days)", risky: false }
+      ],
+      explain: "Long-lived, never-rotated credentials are a prime target if ever leaked." },
+    { q: "Which S3 setup leaves you most exposed to accidental or malicious deletion?",
+      opts: [
+        { t: "Versioning enabled, MFA delete enabled", risky: false },
+        { t: "Versioning disabled", risky: true },
+        { t: "Versioning enabled, MFA delete disabled", risky: false }
+      ],
+      explain: "Without versioning, a deleted or overwritten object is gone for good." },
+    { q: "Which container registry setup is the risky one?",
+      opts: [
+        { t: "Image scanning on push enabled", risky: false },
+        { t: "Image scanning disabled", risky: true },
+        { t: "Scanning enabled + lifecycle policy for old images", risky: false }
+      ],
+      explain: "Unscanned images can ship known vulnerabilities straight into production." }
+  ];
+
+  const QUIZ_LENGTH = 5;
+  const LETTERS = ['A', 'B', 'C'];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildQuizSet(){
+    return shuffle(questionPool).slice(0, QUIZ_LENGTH).map(item => {
+      const shuffledOpts = shuffle(item.opts);
+      return {
+        q: item.q,
+        explain: item.explain,
+        options: shuffledOpts,
+        correct: shuffledOpts.findIndex(o => o.risky)
+      };
+    });
+  }
+
+  let quizQuestions = buildQuizSet();
+  let quizIndex = 0;
+  let quizScore = 0;
+  const quizBody = document.getElementById('quizBody');
+  const quizProgress = document.getElementById('quizProgress');
+  const quizScoreEl = document.getElementById('quizScore');
+
+  function renderQuestion(){
+    const item = quizQuestions[quizIndex];
+    quizProgress.textContent = `Question ${quizIndex + 1}/${quizQuestions.length}`;
+    quizBody.innerHTML = '';
+
+    const snippet = document.createElement('div');
+    snippet.className = 'quiz-snippet';
+    snippet.textContent = item.options.map((o, i) => `${LETTERS[i]}) ${o.t}`).join('\n');
+    quizBody.appendChild(snippet);
+
+    const qEl = document.createElement('div');
+    qEl.className = 'quiz-q';
+    qEl.textContent = item.q;
+    quizBody.appendChild(qEl);
+
+    const optsWrap = document.createElement('div');
+    optsWrap.className = 'quiz-options';
+
+    const feedback = document.createElement('div');
+    feedback.className = 'quiz-feedback';
+
+    item.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = `Option ${LETTERS[i]}`;
+      btn.addEventListener('click', () => {
+        const buttons = optsWrap.querySelectorAll('.quiz-opt');
+        buttons.forEach(b => b.disabled = true);
+
+        if (i === item.correct) {
+          btn.classList.add('correct');
+          quizScore++;
+          quizScoreEl.textContent = quizScore;
+        } else {
+          btn.classList.add('incorrect');
+          buttons[item.correct].classList.add('correct');
+        }
+
+        feedback.textContent = item.explain;
+        feedback.classList.add('show');
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn btn-primary quiz-next';
+        nextBtn.textContent = quizIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Result';
+        nextBtn.addEventListener('click', () => {
+          quizIndex++;
+          if (quizIndex < quizQuestions.length) {
+            renderQuestion();
+          } else {
+            renderResult();
+          }
+        });
+        quizBody.appendChild(nextBtn);
+      });
+      optsWrap.appendChild(btn);
+    });
+
+    quizBody.appendChild(optsWrap);
+    quizBody.appendChild(feedback);
+  }
+
+  function renderResult(){
+    quizProgress.textContent = 'Complete';
+    const total = quizQuestions.length;
+    let grade, msg;
+    if (quizScore === total) { grade = 'Sharp Eye'; msg = `${quizScore}/${total} — you caught every misconfiguration. That's the instinct a GRC review needs.`; }
+    else if (quizScore >= Math.ceil(total * 0.6)) { grade = 'Solid Instincts'; msg = `${quizScore}/${total} — good pattern recognition, worth a second pass on the ones you missed.`; }
+    else { grade = 'Keep Practicing'; msg = `${quizScore}/${total} — this is exactly the muscle the roadmap above is built to train.`; }
+
+    quizBody.innerHTML = `
+      <div class="quiz-result">
+        <div class="mono" style="color:var(--text-muted); font-size:0.8rem; letter-spacing:0.06em;">AUDIT COMPLETE</div>
+        <div class="grade">${grade}</div>
+        <p>${msg}</p>
+        <button class="btn btn-ghost" id="quizRestart">Try Again</button>
+      </div>
+    `;
+    document.getElementById('quizRestart').addEventListener('click', () => {
+      quizQuestions = buildQuizSet();
+      quizIndex = 0;
+      quizScore = 0;
+      quizScoreEl.textContent = 0;
+      renderQuestion();
+    });
+  }
+
+  renderQuestion();
 
   const lines = [
     { k: "AWS-IAM-001 :: least-privilege review", s: "PASS", cls: "pass" },
